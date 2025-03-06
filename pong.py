@@ -22,7 +22,27 @@ def reset_ball(resolution,ball_speed,p_serves = None):
     ball_dy = ball_speed*sin(angle)*y_sign
    
     return ball_pos,ball_dx,ball_dy
-   
+
+def compute_reward(ball_x,paddle_y,ball_y,resolution,paddle_length):
+        
+    if ball_x > 20 :
+        if  paddle_y  <= ball_y <= min(paddle_y+10,resolution[1]):
+            return 2
+        elif  paddle_y+10  < ball_y < min(paddle_y + paddle_length -10, resolution[1]):
+            return 1
+        elif paddle_y + paddle_length -10  <= ball_y <= min(paddle_y + paddle_length , resolution[1]):
+            return 2
+        else:
+            return  round(max(-min(abs(ball_y-paddle_y),abs(ball_y-(paddle_y+paddle_length))) * .01 ,-2),2)
+    elif ball_x <= 20:
+            if  paddle_y  <= ball_y <= min(paddle_y+10,resolution[1]):
+                return 400
+            elif  paddle_y+10  < ball_y < min(paddle_y + paddle_length -10, resolution[1]):
+                return 200
+            elif paddle_y + paddle_length -10  <= ball_y <= min(paddle_y + paddle_length , resolution[1]):
+                return 400
+            else: return -100
+            
 
 
 pygame.init()
@@ -36,7 +56,7 @@ clock = pygame.time.Clock()
 vs_human = True
 paddle_size = (10,50)
 ball_radius = 10
-paddle_speed = 3
+paddle_speed = 5
 ball_speed = 3
 
 #Palette RGB
@@ -60,7 +80,7 @@ run = True
 
 while run:
 
-    dt = clock.tick(0) / 1000 if training_mode else clock.tick(120) / 1000  # No FPS limit when training
+    dt = clock.tick(0) / 1000 if training_mode else clock.tick(15) / 1000  # No FPS limit when training
     dt = 1
     
   
@@ -78,9 +98,10 @@ while run:
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w] and paddle1.top > 0:
         paddle1.y -= paddle_speed * dt
-        print(paddle1.y,dt)
+        # print(paddle1.y,dt)
     if keys[pygame.K_s] and paddle1.bottom < resolution[1]:
         paddle1.y += paddle_speed * dt
+        # print(paddle1.y,dt)
     if keys[pygame.K_UP] and paddle2.top > 0:
         paddle2.y -= paddle_speed * dt
     if keys[pygame.K_DOWN] and paddle2.bottom < resolution[1]:
@@ -112,7 +133,10 @@ while run:
         
     if ball.left <= 0 or ball.right >= resolution[0]:
        ball_pos,ball_dx, ball_dy = reset_ball(resolution,ball_speed)
-       ball.x,ball.y = ball_pos 
+       ball.x,ball.y = ball_pos
+
+    reward=compute_reward(ball_pos[0],paddle1.y,ball_pos[1],resolution,paddle_size[1])
+    print(f'top: {paddle1.y} , ball_y:{ball_pos[1]},bottom: {paddle1.y + 50}, reward: {reward} paddle_x+10:{paddle1.right} ball_x:{ball_pos[0]} ')
 
 
 
