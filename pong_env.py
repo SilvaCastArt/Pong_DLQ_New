@@ -23,10 +23,11 @@ class PongEnv(gym.Env):
             high=np.array([480, 640, 480, 5, 5]),
             dtype=np.float32
         )
-
-        pygame.init()
-        self.screen = pygame.display.set_mode( self.resolution)
-        self.screen.fill((0, 0, 0))
+        
+        if  render_mode == True :
+            pygame.init()
+            self.screen = pygame.display.set_mode( self.resolution)
+            self.screen.fill((0, 0, 0))
 
         # Initialize Pygame
         # pygame.init()
@@ -60,7 +61,7 @@ class PongEnv(gym.Env):
         elif action == 2:  # Small Down
             self.paddle_y += 5  
 
-        self.paddle_y = np.clip(self.paddle_y, 0,  self.resolution[1])
+        self.paddle_y = np.clip(self.paddle_y, 0,  self.resolution[1]- self.paddle_length)
 
         # Ball movement
         self.ball_x += self.ball_dx
@@ -92,33 +93,51 @@ class PongEnv(gym.Env):
                 # Initialize Pygame
 
         clock = pygame.time.Clock()
-        clock.tick(0) 
+        clock.tick(120) 
         self.screen.fill((0, 0, 0))
         pygame.draw.rect(self.screen, (255, 255, 255), (10, self.paddle_y, self.paddle_width, self.paddle_length))
         # pygame.draw.rect(self.screen, (255, 255, 255), (6, self.paddle_y, self.paddle_width, self.paddle_length))
         pygame.draw.circle(self.screen, (255, 255, 255), (int(self.ball_x), int(self.ball_y)), 5)
         pygame.display.flip()
 
-    def compute_reward(self):
+    # def compute_reward(self):
          
-        if self.ball_x > 60 :
-            if  self.paddle_y  <= self.ball_y <= min(self.paddle_y+10,self.resolution[1]):
-                return 2
-            elif  self.paddle_y+10  < self.ball_y < min(self.paddle_y + self.paddle_length -10, self.resolution[1]):
-                return 1
-            elif self.paddle_y + self.paddle_length -10  <= self.ball_y <= min(self.paddle_y + self.paddle_length , self.resolution[1]):
-                return 2
-            else:
-                return max(-min(abs(self.ball_y-self.paddle_y),abs(self.ball_y-(self.paddle_y+self.paddle_length)))*.01,-2)
-        elif self.ball_x <= 60:
-            if  self.paddle_y  <= self.ball_y <= min(self.paddle_y+10,self.resolution[1]):
-                return 200
-            elif  self.paddle_y+10  < self.ball_y < min(self.paddle_y + self.paddle_length -10, self.resolution[1]):
-                return 100
-            elif self.paddle_y + self.paddle_length -10  <= self.ball_y <= min(self.paddle_y + self.paddle_length , self.resolution[1]):
-                return 200
-            else: return -100
-        
+    #     if self.ball_x > 60 :
+    #         if  self.paddle_y  <= self.ball_y <= min(self.paddle_y+10,self.resolution[1]):
+    #             return 10
+    #         elif  self.paddle_y+10  < self.ball_y < min(self.paddle_y + self.paddle_length -10, self.resolution[1]):
+    #             return 5
+    #         elif self.paddle_y + self.paddle_length -10  <= self.ball_y <= min(self.paddle_y + self.paddle_length , self.resolution[1]):
+    #             return 10
+    #         else:
+    #             return max(-min(abs(self.ball_y-self.paddle_y),abs(self.ball_y-(self.paddle_y+self.paddle_length)))*.01,-2)
+    #     elif self.ball_x <= 60:
+    #         if  self.paddle_y  <= self.ball_y <= min(self.paddle_y+10,self.resolution[1]):
+    #             return 500
+    #         elif  self.paddle_y+10  < self.ball_y < min(self.paddle_y + self.paddle_length -10, self.resolution[1]):
+    #             return 500
+    #         elif self.paddle_y + self.paddle_length -10  <= self.ball_y <= min(self.paddle_y + self.paddle_length , self.resolution[1]):
+    #             return 500
+    #         else: return - 150
+
+    def compute_reward(self):
             
+            if self.ball_x <= 20:
+                if  self.paddle_y  <= self.ball_y <= min(self.paddle_y + self.paddle_length,self.resolution[1]):
+                    return 50
+                else:
+                    return max(-min(abs(self.ball_y-self.paddle_y),abs(self.ball_y-(self.paddle_y+self.paddle_length)))*.01,-20)
+            else:
+                if  self.paddle_y  <= self.ball_y <= min(self.paddle_y+10,self.resolution[1]):
+                    return 5
+                elif  self.paddle_y+10  < self.ball_y < min(self.paddle_y + self.paddle_length -10, self.resolution[1]):
+                    return 3
+                elif self.paddle_y + self.paddle_length -10  <= self.ball_y <= min(self.paddle_y + self.paddle_length , self.resolution[1]):
+                    return 5
+                else:
+                    return max(-min(abs(self.ball_y-self.paddle_y),abs(self.ball_y-(self.paddle_y+self.paddle_length)))*.1,-5)
+            
+            
+
 
         

@@ -24,8 +24,13 @@ def reset_ball(resolution,ball_speed,p_serves = None):
     return ball_pos,ball_dx,ball_dy
 
 def compute_reward(ball_x,paddle_y,ball_y,resolution,paddle_length):
-        
-    if ball_x > 20 :
+              
+    if ball_x <= 20:
+        if  paddle_y  <= ball_y <= min(paddle_y + paddle_length,resolution[1]):
+            return 50
+        else:
+            return max(-min(abs(ball_y-paddle_y),abs(ball_y-(paddle_y+paddle_length)))*.01,-50)
+    else:
         if  paddle_y  <= ball_y <= min(paddle_y+10,resolution[1]):
             return 2
         elif  paddle_y+10  < ball_y < min(paddle_y + paddle_length -10, resolution[1]):
@@ -33,15 +38,7 @@ def compute_reward(ball_x,paddle_y,ball_y,resolution,paddle_length):
         elif paddle_y + paddle_length -10  <= ball_y <= min(paddle_y + paddle_length , resolution[1]):
             return 2
         else:
-            return  round(max(-min(abs(ball_y-paddle_y),abs(ball_y-(paddle_y+paddle_length))) * .01 ,-2),2)
-    elif ball_x <= 20:
-            if  paddle_y  <= ball_y <= min(paddle_y+10,resolution[1]):
-                return 400
-            elif  paddle_y+10  < ball_y < min(paddle_y + paddle_length -10, resolution[1]):
-                return 200
-            elif paddle_y + paddle_length -10  <= ball_y <= min(paddle_y + paddle_length , resolution[1]):
-                return 400
-            else: return -100
+            return max(-min(abs(ball_y-paddle_y),abs(ball_y-(paddle_y+paddle_length)))*.01,-1)
             
 
 
@@ -80,7 +77,7 @@ run = True
 
 while run:
 
-    dt = clock.tick(0) / 1000 if training_mode else clock.tick(15) / 1000  # No FPS limit when training
+    dt = clock.tick(0) / 1000 if training_mode else clock.tick(30) / 1000  # No FPS limit when training
     dt = 1
     
   
